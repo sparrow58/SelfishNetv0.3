@@ -9,12 +9,14 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
-using static SelfishNet10.ArpForm;
 
 namespace SelfishNet10
 {
     public partial class MainForm : Form
 	{
+		public delegate void delegateOnNewPC(PC pc);
+
+		public delegate void DelUpdateName(PC pc, string str);
 		public Driver driver;
 
 		public PcList pcs;
@@ -104,7 +106,7 @@ namespace SelfishNet10
 
 		private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
 		{
-			if (MessageBox.Show(this, "Quit the application ?", "Quit", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.No)
+			if (MessageBox.Show(this, "Quit the application ?", "Quit", MessageBoxButtons.YesNo) == DialogResult.No)
 			{
 				e.Cancel = true;
 			}
@@ -222,10 +224,10 @@ namespace SelfishNet10
 
 		public void NicIsSelected(NetworkInterface nic)
 		{
-			this.pcs = new PcList();
-			this.pcs.SetCallBackOnNewPC(new delegateOnNewPC(callbackOnNewPC));
-			this.pcs.SetCallBackOnPCRemove(new delegateOnNewPC(callbackOnPCRemove));
-			this.nicNet = nic;
+			pcs = new PcList();
+			pcs.SetCallBackOnNewPC(callbackOnNewPC);
+			pcs.SetCallBackOnPCRemove(callbackOnPCRemove);
+			nicNet = nic;
 			/* modopt(System.Runtime.CompilerServices.IsConst) */
 			CArp cArp = new CArp(nic, this.pcs);
 			this.cArp = cArp;
@@ -251,6 +253,8 @@ namespace SelfishNet10
 			this.timer2.Interval = 5000;
 			this.timer2.Start();
 			this.treeGridView1.Nodes[0].Expand();
+
+			
 		}
 
 		private void notifyIcon1_MouseDoubleClick(object sender, MouseEventArgs e)
@@ -416,7 +420,7 @@ namespace SelfishNet10
 
 		private void toolStripButton5_Click(object sender, EventArgs e)
 		{
-			if (MessageBox.Show(this, "Quit ?", "Quit", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes && this != null)
+			if (MessageBox.Show(this, "Quit ?", "Quit", MessageBoxButtons.YesNo) == DialogResult.Yes && this != null)
 			{
 				((IDisposable)this).Dispose();
 			}

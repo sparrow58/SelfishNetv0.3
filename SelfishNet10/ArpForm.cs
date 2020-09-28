@@ -624,8 +624,8 @@ namespace SelfishNet10
 		public void NicIsSelected(NetworkInterface nic)
 		{
 			this.pcs = new PcList();
-			this.pcs.SetCallBackOnNewPC(new delegateOnNewPC(callbackOnNewPC));
-			this.pcs.SetCallBackOnPCRemove(new delegateOnNewPC(callbackOnPCRemove));
+			this.pcs.SetCallBackOnNewPC(callbackOnNewPC);
+			this.pcs.SetCallBackOnPCRemove(callbackOnPCRemove);
 			this.nicNet = nic;
 			/* modopt(System.Runtime.CompilerServices.IsConst) */ CArp cArp = new CArp(nic, this.pcs);
 			this.cArp = cArp;

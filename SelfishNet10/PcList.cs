@@ -9,9 +9,9 @@ namespace SelfishNet10
 {
 	public class PcList : IDisposable
 	{
-		private ArpForm.delegateOnNewPC delOnNewPC;
+		private delegateOnNewPC delOnNewPC;
 
-		private ArpForm.delegateOnNewPC delOnPCRemove;
+		private delegateOnNewPC delOnPCRemove;
 
 		public ArrayList pclist;
         private bool disposedValue;
@@ -181,12 +181,12 @@ namespace SelfishNet10
 			Monitor.Exit(this.pclist.SyncRoot);
 		}
 
-		public void SetCallBackOnNewPC(ArpForm.delegateOnNewPC callback)
+		public void SetCallBackOnNewPC(delegateOnNewPC callback)
 		{
 			this.delOnNewPC = callback;
 		}
 
-		public void SetCallBackOnPCRemove(ArpForm.delegateOnNewPC callback)
+		public void SetCallBackOnPCRemove(delegateOnNewPC callback)
 		{
 			this.delOnPCRemove = callback;
 		}

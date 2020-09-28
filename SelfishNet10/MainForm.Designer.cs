@@ -105,6 +105,7 @@ namespace SelfishNet10
 		{
             this.components = new System.ComponentModel.Container();
             AdvancedDataGridView.TreeGridNode treeGridNode1 = new AdvancedDataGridView.TreeGridNode();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
@@ -440,9 +441,10 @@ namespace SelfishNet10
             // 
             // imageList1
             // 
-            this.imageList1.ColorDepth = System.Windows.Forms.ColorDepth.Depth8Bit;
-            this.imageList1.ImageSize = new System.Drawing.Size(16, 16);
+            this.imageList1.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList1.ImageStream")));
             this.imageList1.TransparentColor = System.Drawing.Color.White;
+            this.imageList1.Images.SetKeyName(0, "circle.png");
+            this.imageList1.Images.SetKeyName(1, "router.png");
             // 
             // timer1
             // 
@@ -477,7 +479,7 @@ namespace SelfishNet10
             this.Controls.Add(this.toolStrip1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
             this.MaximizeBox = false;
-            this.Name = "SelfishNetSabsab";
+            this.Name = "MainForm";
             this.Text = "SelfishNetSabsab v0.1 Beta";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.Load += new System.EventHandler(this.MainForm_Load);
@@ -488,6 +490,7 @@ namespace SelfishNet10
             this.ContextMenuViews.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
+
 		}
         #endregion
     }
