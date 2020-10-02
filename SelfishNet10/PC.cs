@@ -2,7 +2,7 @@ using System;
 using System.Net;
 using System.Net.NetworkInformation;
 
-namespace SelfishNet10
+namespace SelfishNet
 {
 	public class PC
 	{
@@ -16,9 +16,9 @@ namespace SelfishNet10
 
 		public bool isLocalPc;
 
-		public int capDown;
+		public int CapDown { set; get; }
 
-		public int capUp;
+		public int CapUp { set; get; }
 
 		public bool redirect;
 

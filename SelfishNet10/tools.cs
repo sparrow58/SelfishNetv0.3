@@ -1,7 +1,7 @@
 using System;
 using System.Net;
 
-namespace SelfishNet10
+namespace SelfishNet
 {
 	public class tools
 	{

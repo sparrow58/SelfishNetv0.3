@@ -4,7 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 
-namespace SelfishNet10
+namespace SelfishNet
 {
 	public class CWizard : Form
 	{
@@ -23,7 +23,7 @@ namespace SelfishNet10
 			try
 			{
 				this.InitializeComponent();
-				ArpForm.instance.Enabled = false;
+				MainForm.instance.Enabled = false;
             }
             catch { }
 		}
@@ -45,12 +45,12 @@ namespace SelfishNet10
 				{
 					File.Move("license.txt", "LicenseYouAccepted.txt");
 				}
-				ArpForm.instance.Enabled = true;
-				ArpForm.instance.licenseAccepted();
+				MainForm.instance.Enabled = true;
+				MainForm.instance.licenseAccepted();
 			}
 			else
 			{
-				IDisposable disposable = ArpForm.instance;
+				IDisposable disposable = MainForm.instance;
 				if (disposable != null)
 				{
 					disposable.Dispose();

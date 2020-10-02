@@ -1,4 +1,4 @@
-﻿using SelfishNet10;
+﻿using SelfishNet;
 
 public delegate void delegateOnNewPC(PC pc);
 

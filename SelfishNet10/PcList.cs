@@ -5,7 +5,7 @@ using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Threading;
 
-namespace SelfishNet10
+namespace SelfishNet
 {
 	public class PcList : IDisposable
 	{

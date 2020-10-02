@@ -5,7 +5,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace SelfishNet10
+namespace SelfishNet
 {
     partial class MainForm
     {
@@ -409,8 +409,8 @@ namespace SelfishNet10
             this.ViewMenuDownloadCap.Name = "ViewMenuDownloadCap";
             this.ViewMenuDownloadCap.Size = new System.Drawing.Size(152, 22);
             this.ViewMenuDownloadCap.Text = "Download Cap";
-            this.ViewMenuDownloadCap.CheckStateChanged += new System.EventHandler(this.downloadCapToolStripMenuItem_CheckStateChanged);
-            this.ViewMenuDownloadCap.Click += new System.EventHandler(this.downloadCapToolStripMenuItem_Click);
+            this.ViewMenuDownloadCap.CheckStateChanged += new System.EventHandler(this.DownloadCapToolStripMenuItem_CheckStateChanged);
+            this.ViewMenuDownloadCap.Click += new System.EventHandler(this.DownloadCapToolStripMenuItem_Click);
             // 
             // ViewMenuUploadCap
             // 
