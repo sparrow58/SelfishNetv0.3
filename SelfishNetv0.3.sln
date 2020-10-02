@@ -2,7 +2,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30517.126
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SelfishNetv0.2-beta_vista", "SelfishNetv0.2-beta_vista.csproj", "{B2E7E08B-DB99-4DD9-9C17-0AAE55F8EDCA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SelfishNetv0.3", "SelfishNetv0.3.csproj", "{B2E7E08B-DB99-4DD9-9C17-0AAE55F8EDCA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
