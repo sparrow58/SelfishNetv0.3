@@ -13,3 +13,4 @@ What have been added:
 2- Change Icons.
 3- Improve peformance by using Task instead of using Threads Directly.
 4- Fix some bugs the must important one is the high CPU load when disconnected. 
+5- Add request for administrator privileges
