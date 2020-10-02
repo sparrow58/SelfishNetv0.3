@@ -7,6 +7,9 @@ I'm happy to make the code available for developers and to contribute on underst
 
 The code until now is completely miss and needs to be refactored and cleaned.
 
+Requirements:
+You need to have WinPcap previously installed.
+
 What have been added:
 
 1- Upgrade to 4.7 .NET Framework.
